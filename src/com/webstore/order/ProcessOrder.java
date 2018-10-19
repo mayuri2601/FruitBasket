@@ -25,9 +25,10 @@ public class ProcessOrder {
 		Double totalBasketCost = 0.0;
 		if (!(null == storeItems) && !(null == customerItems)) {
 			for (FruitBasketItems customerBasket : customerItems) {
-				if (storeItems.containsKey(customerBasket.getItemName())) {
+				String itemName = customerBasket.getItemName();
+				if (itemName != null && storeItems.containsKey(itemName)) {
 					totalBasketCost = totalBasketCost
-							+ (storeItems.get(customerBasket.getItemName()) * customerBasket.getItemCount());
+							+ (storeItems.get(itemName) * customerBasket.getItemCount());
 				}
 			}
 		}
