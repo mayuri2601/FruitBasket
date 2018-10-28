@@ -3,117 +3,129 @@
  */
 package com.webstore.order.test;
 
-import static org.junit.Assert.*;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.webstore.order.FruitBasketItems;
-import com.webstore.order.ProcessOrder;
+import com.webstore.order.constants.OFFER;
+import com.webstore.order.exception.FruitStoreException;
+import com.webstore.order.service.ProcessOrder;
+import com.webstore.order.service.ProcessOrderImpl;
 
 /**
- * Unit test to test scenarios to check calculated cost,
- * cost failure scenario, null check.
+ * Unit test to test scenarios to check calculated cost, cost failure scenario,
+ * null check.
  *
  */
 public class ProcessOrderUTest {
 
-	private ProcessOrder orderProcessor;
-	private Map<String, Double> storeItems;
-	private List<FruitBasketItems> customerItems;
+	ProcessOrder order = new ProcessOrderImpl();
 
 	/**
 	 * Method to add the items in the store.
 	 */
 	@Before
 	public void setUp() {
-		orderProcessor = new ProcessOrder();
-		storeItems = new HashMap<String, Double>();
-		customerItems = new ArrayList<FruitBasketItems>();
-		storeItems.put("banana", 20.00);
-		storeItems.put("orange", 30.00);
-		storeItems.put("apple", 40.00);
-		storeItems.put("lemon", 10.50);
-		storeItems.put("peach", 50.00);
+		try {
+			ProcessOrder.storeItems.clear();
+			ProcessOrder.customerBasket.clear();
+			order.loadStore("banana", 20.0, OFFER.NONE, 100, false);
+			order.loadStore("orange", 30.0, OFFER.DISCOUNT_IN_PERCENT, 100, true);
+			order.loadStore("apple", 40.0, OFFER.NONE, 100, false);
+			order.loadStore("lemon", 10.0, OFFER.NONE, 100, false);
+			order.loadStore("peach", 50.0, OFFER.PROMOTIONAL_OFFER, 100, true);
+		} catch (FruitStoreException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
-	 * Method to test total basket cost.
+	 * Load customer basket and check the cost of the basket.
 	 */
 	@Test
-	public void testCalculateBasketCostSuccess() {
+	public void testCalculateBasketCost() {
 		// user inputs
-		FruitBasketItems item = new FruitBasketItems();
-		item.setItemName("banana");
-		item.setItemCount(5);
-		customerItems.add(item);
-
-		FruitBasketItems secondItem = new FruitBasketItems();
-		secondItem.setItemName("orange");
-		secondItem.setItemCount(10);
-		customerItems.add(secondItem);
-
-		assertEquals(400.00, orderProcessor.calculateBasketCost(storeItems, customerItems), 0.0);
+		try {
+			order.loadCustomerBasket("banana", 5);
+			order.loadCustomerBasket("orange", 10);
+			order.loadCustomerBasket("lemon", 10);
+			Double cost = order.processCustomerOrder(ProcessOrder.customerBasket);
+			assertEquals(540.0, cost, 0.0);
+		} catch (FruitStoreException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
-	 * Method to test total basket cost.
+	 * Validate null check for fruit list and quantity.
+	 */
+	@Test
+	public void testCalculteBasketForNull() {
+		try {
+			order.loadCustomerBasket(null, null);
+			order.processCustomerOrder(ProcessOrder.customerBasket);
+		} catch (FruitStoreException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * quantity not available in the store check.
+	 */
+	@Test
+	public void testINsufficientQuantityCheck() {
+		try {
+			order.loadCustomerBasket("banana", 200);
+			order.processCustomerOrder(ProcessOrder.customerBasket);
+		} catch (FruitStoreException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Validate null check for quantity.
+	 */
+	@Test
+	public void testCalculteBasketForNullQuantity() {
+		try {
+			order.loadCustomerBasket("Banana", null);
+			order.processCustomerOrder(ProcessOrder.customerBasket);
+		} catch (FruitStoreException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Method to test total basket cost for all the items.
 	 */
 	@Test
 	public void testCalculateBasketCostAllSuccess() {
 		// user inputs
-		FruitBasketItems item = new FruitBasketItems();
-		item.setItemName("lemon");
-		item.setItemCount(2);
-		customerItems.add(item);
-
-		FruitBasketItems secondItem = new FruitBasketItems();
-		secondItem.setItemName("banana");
-		secondItem.setItemCount(2);
-		customerItems.add(secondItem);
-
-		FruitBasketItems thirdItem = new FruitBasketItems();
-		thirdItem.setItemName("orange");
-		thirdItem.setItemCount(2);
-		customerItems.add(thirdItem);
-
-		FruitBasketItems fourthItem = new FruitBasketItems();
-		fourthItem.setItemName("apple");
-		fourthItem.setItemCount(2);
-		customerItems.add(fourthItem);
-
-		FruitBasketItems fifthItem = new FruitBasketItems();
-		fifthItem.setItemName("peach");
-		fifthItem.setItemCount(2);
-		customerItems.add(fifthItem);
-
-		assertEquals(301.00, orderProcessor.calculateBasketCost(storeItems, customerItems), 0.0);
+		try {
+			order.loadCustomerBasket("banana", 10);
+			order.loadCustomerBasket("orange", 10);
+			order.loadCustomerBasket("lemon", 10);
+			order.loadCustomerBasket("peach", 10);
+			order.loadCustomerBasket("apple", 10);
+			Double cost = order.processCustomerOrder(ProcessOrder.customerBasket);
+			assertEquals (1570.0, cost,0.0);
+		} catch (FruitStoreException e) {
+			e.printStackTrace();
+		}
 	}
 
+	/**
+	 * Test for minus input values
+	 */
 	@Test
-	public void testCalculateBasketCostFailure() {
+	public void testCalculateBasketCostNegativeValueCheck() {
 		// user inputs
-		FruitBasketItems item = new FruitBasketItems();
-		item.setItemName(null);
-		item.setItemCount(5);
-		customerItems.add(item);
-
-		FruitBasketItems secondItem = new FruitBasketItems();
-		secondItem.setItemName("orange");
-		secondItem.setItemCount(10);
-		customerItems.add(secondItem);
-
-		assertNotEquals(500.00, orderProcessor.calculateBasketCost(storeItems, customerItems), 0.0);
+		try {
+			order.loadCustomerBasket("banana", -5);
+			order.processCustomerOrder(ProcessOrder.customerBasket);
+		} catch (FruitStoreException e) {
+			e.printStackTrace();
+		}
 	}
-
-	@Test
-	public void testCalculateBasketCostNullcheck() {
-		assertNotEquals(500.00, orderProcessor.calculateBasketCost(null, null), 0.0);
-	}
-
 }
