@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.webstore.order.model;
 
 import com.webstore.order.constants.OFFER;
