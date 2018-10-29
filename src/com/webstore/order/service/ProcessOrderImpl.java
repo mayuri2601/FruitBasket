@@ -33,6 +33,12 @@ public class ProcessOrderImpl implements ProcessOrder {
 		return customerBasket;
 	}
 
+	/**
+	 * Method to process the customer order.
+	 * Check store quantity, customer quantity , 
+	 * check if any promotions applied and 
+	 * process the customer basket with billing cost.
+	 */
 	public Double processCustomerOrder(HashMap<String, Integer> customerBasket) throws FruitStoreException {
 		Double totalBasketCost = 0.0;
 		boolean flag = false;
@@ -65,6 +71,9 @@ public class ProcessOrderImpl implements ProcessOrder {
 
 	}
 
+	/**
+	 * Check offers aplied and update the final cost of the basket.
+	 */
 	private Double checkOffers(HashMap<String, Integer> customerBasket, Double totalBasketCost, String name) {
 		if (storeItems.get(name).isOffer()) {
 			if (OFFER.PROMOTIONAL_OFFER.equals(storeItems.get(name).getOffers())) {
