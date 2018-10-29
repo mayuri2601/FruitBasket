@@ -6,8 +6,14 @@ import com.webstore.order.constants.OFFER;
 import com.webstore.order.exception.FruitStoreException;
 import com.webstore.order.model.FruitSpecification;
 
+/**
+ * Implementation class to process order.
+ */
 public class ProcessOrderImpl implements ProcessOrder {
 
+	/**
+	 * method to add items in the fruit store.
+	 */
 	public void loadStore(String name, Double price, OFFER offer, Integer quantity, boolean isOffer)
 			throws FruitStoreException {
 		FruitSpecification fruit = new FruitSpecification();
@@ -19,6 +25,9 @@ public class ProcessOrderImpl implements ProcessOrder {
 		storeItems.put(name, fruit);
 	}
 
+	/**
+	 * Method to add fruits in customer basket.
+	 */
 	public HashMap<String, Integer> loadCustomerBasket(String name, Integer quantity) throws FruitStoreException {
 		customerBasket.put(name, quantity);
 		return customerBasket;
